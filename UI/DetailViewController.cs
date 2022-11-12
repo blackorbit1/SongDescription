@@ -15,48 +15,106 @@ namespace SongDescriptionButItWorks.UI
     class DetailViewController
     {
         static IPreviewBeatmapLevel lastLevel;
+        static Boolean isPlaylist;
 
         [UIComponent("button")] public readonly NoTransitionsButton buttonGo = null;
-        [UIComponent("description")] public readonly CurvedTextMeshPro descriptionText = null;
+        [UIComponent("description")] public readonly CurvedTextMeshPro description = null;
+        [UIComponent("bsr")] public readonly CurvedTextMeshPro bsr = null;
+        [UIComponent("mapperName")] public readonly CurvedTextMeshPro mapperName = null;
+        [UIComponent("date")] public readonly CurvedTextMeshPro date = null;
 
 
         internal void SetLevel(IBeatmapLevel level)
         {
             lastLevel = level;
         }
+        
+        internal void SetIsPlaylist(Boolean newIsPlaylist)
+        {
+            isPlaylist = newIsPlaylist;
+        }
 
         async void LoadDescription()
         {
             if(!lastLevel.levelID.StartsWith("custom_level_"))
             {
-                descriptionText.text = "Not a custom level";
+                description.text = "Not a custom level";
                 return;
             }
 
-            descriptionText.text = "Loading...";
+            description.text = "Loading...";
 
             var hash = lastLevel.levelID.Substring(13, 40);
 
             try
             {
-                var description = await Task.Run(() => {
+                var i = 1;
+                Plugin.Log.Info($"{i++}");
+                var mapInfo = await Task.Run(() => {
+                    Plugin.Log.Info($"{i++}");
                     var download = new WebClient().DownloadData($"https://api.beatsaver.com/maps/hash/{hash}");
+                    Plugin.Log.Info($"{i++}");
 
                     using (var jsonReader = new JsonTextReader(new StreamReader(new MemoryStream(download))))
                     {
+                        Plugin.Log.Info($"{i++}");
                         var ser = new JsonSerializer();
+                        Plugin.Log.Info($"{i++}");
 
-                        return ser.Deserialize<JObject>(jsonReader).GetValue("description").Value<string>();
+                        return ser.Deserialize<JObject>(jsonReader);
+                        // return isPlaylist ? "yes playlist" : "not playlist";
                     }
                 });
+                Plugin.Log.Info($"{i++}");
 
-                descriptionText.text = description;
-                descriptionText.gameObject.SetActive(false);
-                descriptionText.gameObject.SetActive(true);
+                Plugin.Log.Info($"description {mapInfo.GetValue("description").Value<string>()}");
+                Plugin.Log.Info($"id {mapInfo.GetValue("id").Value<string>()}");
+                Plugin.Log.Info($"updatedAt {mapInfo.GetValue("updatedAt").Value<string>()}");
+                // Plugin.Log.Info($"uploader.name {mapInfo.GetValue("uploader.name").Value<string>()}");
+
+
+                try{
+                    description.text = mapInfo.GetValue("description").Value<string>();
+                } catch { Plugin.Log.Error("Error while setting description"); }
+
+                try
+                {
+                    bsr.text = mapInfo.GetValue("id").Value<string>();
+                } catch { Plugin.Log.Error("Error while setting id"); }
+
+                try
+                {
+                    date.text = mapInfo.GetValue("updatedAt").Value<string>();
+                } catch { Plugin.Log.Error("Error while setting updatedAt"); }
+
+                
+                try
+                {
+                    // mapperName.text = mapInfo.GetValue("uploader.name").Value<string>();
+                    mapperName.text = "blackorbit";
+                } catch { Plugin.Log.Error("Error while setting uploader.name"); }
+                
+                
+                
+                
+
+                Plugin.Log.Info($"description2 {description.text}");
+                Plugin.Log.Info($"id2 {bsr.text}");
+                Plugin.Log.Info($"updatedAt2 {date.text}");
+                // Plugin.Log.Info($"uploader.name2 {mapperName.text}");
+
+                description.gameObject.SetActive(false);
+                description.gameObject.SetActive(true);
+                bsr.gameObject.SetActive(false);
+                bsr.gameObject.SetActive(true);
+                date.gameObject.SetActive(false);
+                date.gameObject.SetActive(true);
+                mapperName.gameObject.SetActive(false);
+                mapperName.gameObject.SetActive(true);
             } 
             catch
             {
-                descriptionText.text = "Failed to load Description";
+                description.text = "Failed to load Description";
             }
         }
     }
