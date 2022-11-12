@@ -2,6 +2,7 @@
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
+using SongDescriptionButItWorks.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace SongDescriptionButItWorks
         internal static Plugin Instance;
         internal static IPALogger Log;
         internal static Harmony harmony;
+        internal static DetailViewController detail;
 
         [Init]
         public Plugin(IPALogger logger, IPA.Config.Config conf)
@@ -30,6 +32,7 @@ namespace SongDescriptionButItWorks
             Log = logger;
             //Config.Instance = conf.Generated<Config>();
             harmony = new Harmony("Kinsi55.BeatSaber.SongDescriptionButItWorks");
+            detail = new DetailViewController();
         }
 
         [OnEnable]

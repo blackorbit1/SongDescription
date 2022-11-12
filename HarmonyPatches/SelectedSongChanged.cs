@@ -18,20 +18,20 @@ namespace SongDescriptionButItWorks.HarmonyPatches
     )]
     static class SelectedSongChanged
     {
-        static DetailViewController detail = new DetailViewController();
+        
 
         static void Postfix(StandardLevelDetailView __instance, IBeatmapLevel level)
         {
-            detail.SetLevel(level);
+            Plugin.detail.SetLevel(level);
 
-            if (detail.buttonGo != null)
+            if (Plugin.detail.buttonGo != null)
                 return;
 
             // Create the UI if it isnt yet (Button and Modal)
             BSMLParser.instance.Parse(
                 Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "SongDescriptionButItWorks.UI.detailui.bsml"),
                 __instance.gameObject,
-                detail
+                Plugin.detail
             );
         }
     }
